@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐱 The oiia-inator</title>
+  <link rel="stylesheet" href="/styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Main screen -->
+    <div id="screen-main" class="screen active">
+      <h1 class="title">🐱 The oiia-inator 🐱</h1>
+      <p class="subtitle">Turn any audio into oiiaioiiiai</p>
+
+      <div id="dropzone" class="dropzone">
+        <div class="dropzone-content">
+          <span class="dropzone-icon">🎵</span>
+          <p>Drop your audio file here</p>
+          <p class="dropzone-hint">or click to browse</p>
+        </div>
+        <input type="file" id="file-input" accept="audio/*" hidden />
+      </div>
+
+      <div id="file-info" class="file-info hidden">
+        <span id="file-name"></span>
+        <button id="file-remove" class="btn-icon" title="Remove">✕</button>
+      </div>
+
+      <div class="controls">
+        <h2>Settings</h2>
+
+        <div class="control-group">
+          <label for="snippet-size">Snippet Size: <span id="snippet-size-value">100</span>ms</label>
+          <input type="range" id="snippet-size" min="30" max="300" value="100" step="10" />
+          <div class="range-labels">
+            <span>30ms (choppy)</span>
+            <span>300ms (smooth)</span>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>Matching Strategy:</label>
+          <div class="radio-group">
+            <label><input type="radio" name="strategy" value="nearest" checked /> Nearest Match</label>
+            <label><input type="radio" name="strategy" value="smooth" /> Smooth (continuity)</label>
+            <label><input type="radio" name="strategy" value="chaos" /> Chaos (random top-K)</label>
+            <label><input type="radio" name="strategy" value="musical" /> Musical (weighted)</label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="pitch-shift" />
+            Match target pitch (pitch-shift snippets)
+          </label>
+        </div>
+      </div>
+
+      <button id="btn-process" class="btn-primary" disabled>🐱 oiia-ify!</button>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="screen-loading" class="screen">
+      <div class="loading-content">
+        <div class="loading-cat">🐱</div>
+        <h2 id="loading-title">oiia oiia oiia...</h2>
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+        </div>
+        <p id="progress-percent">0%</p>
+        <p id="loading-message" class="loading-message">Warming up the cat...</p>
+      </div>
+    </div>
+
+    <!-- Result screen -->
+    <div id="screen-result" class="screen">
+      <h1 class="title">🐱 Your oiia is ready! 🐱</h1>
+
+      <div class="player-section">
+        <div class="player-row">
+          <span class="player-label">Original:</span>
+          <audio id="player-original" controls></audio>
+        </div>
+        <div class="player-row">
+          <span class="player-label">oiia-ified:</span>
+          <audio id="player-result" controls></audio>
+        </div>
+      </div>
+
+      <div id="stats" class="stats"></div>
+
+      <div class="result-actions">
+        <button id="btn-download" class="btn-primary">⬇ Download WAV</button>
+        <button id="btn-retry" class="btn-secondary">🔄 Try Different Settings</button>
+        <button id="btn-new" class="btn-secondary">🎵 New Audio</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
