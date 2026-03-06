@@ -122,11 +122,27 @@ function createWorker() {
 }
 
 /**
- * Show an error to the user.
+ * Show an error to the user via the inline error banner.
  * @param {string} message
  */
 function showError(message) {
-  alert(`oiia-inator error: ${message}`);
+  const banner = document.getElementById('error-banner');
+  const msgEl = document.getElementById('error-message');
+  msgEl.textContent = message;
+  banner.classList.remove('hidden');
+
+  // Auto-dismiss after 8 seconds
+  clearTimeout(showError._timer);
+  showError._timer = setTimeout(() => dismissError(), 8000);
+}
+
+/**
+ * Dismiss the error banner.
+ */
+function dismissError() {
+  const banner = document.getElementById('error-banner');
+  banner.classList.add('hidden');
+  clearTimeout(showError._timer);
 }
 
 /**
@@ -255,6 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedFile = null;
     updateProcessButton();
   });
+
+  // Wire up the error banner dismiss button
+  document.getElementById('error-dismiss').addEventListener('click', dismissError);
 
   // Wire up the process button
   const btnProcess = document.getElementById('btn-process');
