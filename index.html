@@ -3,23 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🐱 The oiia-inator</title>
-  <link rel="stylesheet" href="/styles/main.css" />
+  <title>The oiia-inator</title>
+  <!-- Critical CSS: hide inactive screens immediately to prevent flash -->
+  <style>
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+    body { margin: 0; background: #1a1a2e; color: #f0f0f0; }
+  </style>
 </head>
 <body>
   <div id="app">
     <!-- Main screen -->
     <div id="screen-main" class="screen active">
-      <h1 class="title">🐱 The oiia-inator 🐱</h1>
+      <h1 class="title">The oiia-inator</h1>
       <p class="subtitle">Turn any audio into oiiaioiiiai</p>
 
-      <div id="dropzone" class="dropzone">
-        <div class="dropzone-content">
-          <span class="dropzone-icon">🎵</span>
-          <p>Drop your audio file here</p>
-          <p class="dropzone-hint">or click to browse</p>
+      <!-- Input mode tabs -->
+      <div class="input-tabs">
+        <button class="input-tab active" data-tab="file">Upload File</button>
+        <button class="input-tab" data-tab="youtube">YouTube Link</button>
+      </div>
+
+      <!-- File upload panel -->
+      <div id="panel-file" class="input-panel active">
+        <div id="dropzone" class="dropzone">
+          <div class="dropzone-content">
+            <span class="dropzone-icon">🎵</span>
+            <p>Drop your audio file here</p>
+            <p class="dropzone-hint">or click to browse</p>
+          </div>
+          <input type="file" id="file-input" accept="audio/*" hidden />
         </div>
-        <input type="file" id="file-input" accept="audio/*" hidden />
+      </div>
+
+      <!-- YouTube link panel -->
+      <div id="panel-youtube" class="input-panel">
+        <div class="youtube-input-group">
+          <span class="youtube-icon">📺</span>
+          <input type="text" id="youtube-url" class="youtube-url-input"
+                 placeholder="Paste a YouTube link here..."
+                 autocomplete="off" spellcheck="false" />
+          <button id="btn-fetch-yt" class="btn-fetch-yt" disabled>Fetch</button>
+        </div>
+        <p class="youtube-hint">e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...</p>
+        <div id="youtube-status" class="youtube-status hidden"></div>
       </div>
 
       <div id="file-info" class="file-info hidden">
@@ -57,7 +84,7 @@
         </div>
       </div>
 
-      <button id="btn-process" class="btn-primary" disabled>🐱 oiia-ify!</button>
+      <button id="btn-process" class="btn-primary" disabled>oiia-ify!</button>
     </div>
 
     <!-- Loading screen -->
@@ -75,7 +102,7 @@
 
     <!-- Result screen -->
     <div id="screen-result" class="screen">
-      <h1 class="title">🐱 Your oiia is ready! 🐱</h1>
+      <h1 class="title">Your oiia is ready!</h1>
 
       <div class="player-section">
         <div class="player-row">
@@ -91,9 +118,9 @@
       <div id="stats" class="stats"></div>
 
       <div class="result-actions">
-        <button id="btn-download" class="btn-primary">⬇ Download WAV</button>
-        <button id="btn-retry" class="btn-secondary">🔄 Try Different Settings</button>
-        <button id="btn-new" class="btn-secondary">🎵 New Audio</button>
+        <button id="btn-download" class="btn-primary">Download WAV</button>
+        <button id="btn-retry" class="btn-secondary">Try Different Settings</button>
+        <button id="btn-new" class="btn-secondary">New Audio</button>
       </div>
     </div>
   </div>
