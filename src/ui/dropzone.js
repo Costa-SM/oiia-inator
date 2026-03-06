@@ -23,6 +23,9 @@ export function initDropzone(onFileSelected) {
   /** @type {File | null} */
   let currentFile = null;
 
+  /** @type {number | null} */
+  let errorTimeout = null;
+
   // --- Click to browse ---
   dropzone.addEventListener('click', () => {
     fileInput.click();
@@ -76,10 +79,12 @@ export function initDropzone(onFileSelected) {
    * @param {File} file
    */
   function handleFile(file) {
+    // Clear any previous error state
+    clearError();
+
     if (!file.type.startsWith('audio/')) {
-      // Not an audio file — shake the dropzone briefly to signal error
-      dropzone.classList.add('shake');
-      setTimeout(() => dropzone.classList.remove('shake'), 500);
+      // Not an audio file — shake the dropzone and show an error message
+      showError(`"${file.name}" is not an audio file. Please drop an audio file (MP3, WAV, OGG, etc.)`);
       return;
     }
 
@@ -94,6 +99,44 @@ export function initDropzone(onFileSelected) {
     btnProcess.disabled = false;
 
     onFileSelected(file);
+  }
+
+  /**
+   * Show an error message below the dropzone with a shake animation.
+   * Auto-clears after 4 seconds.
+   * @param {string} message
+   */
+  function showError(message) {
+    dropzone.classList.add('shake');
+    setTimeout(() => dropzone.classList.remove('shake'), 500);
+
+    // Create or reuse an error element
+    let errorEl = dropzone.parentElement.querySelector('.dropzone-error');
+    if (!errorEl) {
+      errorEl = document.createElement('p');
+      errorEl.className = 'dropzone-error';
+      // Insert right after the dropzone
+      dropzone.insertAdjacentElement('afterend', errorEl);
+    }
+    errorEl.textContent = message;
+    errorEl.classList.add('visible');
+
+    // Auto-dismiss after 4 seconds
+    errorTimeout = setTimeout(() => clearError(), 4000);
+  }
+
+  /**
+   * Clear any visible error message.
+   */
+  function clearError() {
+    if (errorTimeout) {
+      clearTimeout(errorTimeout);
+      errorTimeout = null;
+    }
+    const errorEl = dropzone.parentElement.querySelector('.dropzone-error');
+    if (errorEl) {
+      errorEl.classList.remove('visible');
+    }
   }
 
   /**
