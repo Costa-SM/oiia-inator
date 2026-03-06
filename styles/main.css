@@ -99,11 +99,156 @@ body {
   font-style: italic;
 }
 
+/* --- Input Tabs (File / YouTube) --- */
+.input-tabs {
+  display: flex;
+  gap: 0;
+  width: 100%;
+  margin-bottom: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+}
+
+.input-tab {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.input-tab:hover {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+.input-tab.active {
+  background: rgba(15, 52, 96, 0.3);
+  color: var(--accent-orange);
+  box-shadow: inset 0 -2px 0 var(--accent-orange);
+}
+
+/* --- Input Panels --- */
+.input-panel {
+  display: none;
+  width: 100%;
+}
+
+.input-panel.active {
+  display: block;
+}
+
+/* --- YouTube Input --- */
+.youtube-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1.25rem;
+  background: rgba(15, 52, 96, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.youtube-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.youtube-url-input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.youtube-url-input::placeholder {
+  color: var(--text-muted);
+}
+
+.youtube-url-input:focus {
+  border-color: var(--accent-orange);
+}
+
+.btn-fetch-yt {
+  padding: 0.6rem 1rem;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--accent-purple);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition), opacity var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-fetch-yt:hover:not(:disabled) {
+  background: #8e44ad;
+}
+
+.btn-fetch-yt:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.youtube-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.youtube-status {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.youtube-status.hidden {
+  display: none;
+}
+
+.youtube-status.info {
+  background: rgba(155, 89, 182, 0.1);
+  border: 1px solid rgba(155, 89, 182, 0.3);
+  color: var(--accent-purple);
+}
+
+.youtube-status.error {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: var(--danger);
+}
+
+.youtube-status.success {
+  background: rgba(46, 204, 113, 0.1);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: var(--success);
+}
+
 /* --- Dropzone --- */
 .dropzone {
   width: 100%;
   border: 3px dashed var(--border-color);
-  border-radius: var(--radius);
+  border-radius: 0 0 var(--radius) var(--radius);
   padding: 3rem 2rem;
   text-align: center;
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' style='font-size:24px'><text y='24'>🐾</text></svg>") 8 8, pointer;
@@ -734,6 +879,19 @@ input[type="checkbox"]:focus-visible {
   .btn-secondary {
     font-size: 1rem;
     padding: 0.75rem 1.5rem;
+  }
+
+  .youtube-input-group {
+    flex-wrap: wrap;
+  }
+
+  .youtube-url-input {
+    min-width: 0;
+  }
+
+  .input-tab {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
   }
 }
 
