@@ -4,20 +4,27 @@
  * Wires together the UI modules and the processing Web Worker.
  *
  * Flow:
- * 1. User drops an audio file
+ * 1. User drops an audio file OR pastes a YouTube link
  * 2. User clicks "oiia-ify!" → settings + audio sent to Web Worker
  * 3. Worker reports progress → loading screen updates
  * 4. Worker returns result → result screen shows with playback + download
  */
 
+// Import CSS through Vite's module system (ensures proper bundling)
+import '../styles/main.css';
+
 import { initDropzone } from './ui/dropzone.js';
 import { initControls, getSettings } from './ui/controls.js';
 import { showLoading, updateProgress, hideLoading } from './ui/loading.js';
 import { showResult } from './ui/player.js';
+import { initYouTube } from './ui/youtube.js';
 
 // --- State ---
 /** @type {File|null} */
 let selectedFile = null;
+
+/** @type {string} Current input mode: 'file' or 'youtube' */
+let inputMode = 'file';
 
 /** @type {Worker|null} */
 let worker = null;
@@ -100,7 +107,6 @@ function createWorker() {
       case 'error':
         hideLoading();
         showError(payload.message);
-        // Go back to main screen
         document.getElementById('screen-main').classList.add('active');
         break;
     }
@@ -120,8 +126,15 @@ function createWorker() {
  * @param {string} message
  */
 function showError(message) {
-  // For now, use alert. Could be replaced with a nicer modal later.
   alert(`oiia-inator error: ${message}`);
+}
+
+/**
+ * Update the process button state based on whether we have valid input.
+ */
+function updateProcessButton() {
+  const btnProcess = document.getElementById('btn-process');
+  btnProcess.disabled = !selectedFile;
 }
 
 /**
@@ -132,7 +145,6 @@ async function startProcessing() {
 
   const settings = getSettings();
 
-  // Show loading screen
   showLoading();
   updateProgress(0, 'Decoding your audio...');
 
@@ -144,8 +156,7 @@ async function startProcessing() {
     ]);
 
     // Both sources are decoded through the same AudioContext, so they share
-    // its native sample rate. Assert this to guard against future refactors
-    // (e.g., using separate contexts) that could silently break processing.
+    // its native sample rate. Assert this to guard against future refactors.
     if (targetResult.sampleRate !== oiiaResult.sampleRate) {
       throw new Error(
         `Sample rate mismatch: target is ${targetResult.sampleRate}Hz ` +
@@ -155,12 +166,10 @@ async function startProcessing() {
 
     updateProgress(5, 'Audio decoded! Starting the pipeline...');
 
-    // Create worker (or reuse)
     if (worker) worker.terminate();
     worker = createWorker();
 
-    // Build transferable channel arrays
-    // We need to copy them since AudioBuffer channel data may not be transferable
+    // Copy channel data so the ArrayBuffers can be transferred
     const targetChannels = targetResult.channels.map((ch) => {
       const copy = new Float32Array(ch.length);
       copy.set(ch);
@@ -172,13 +181,11 @@ async function startProcessing() {
       return copy;
     });
 
-    // Collect all buffers for transfer
     const transferables = [
       ...targetChannels.map((ch) => ch.buffer),
       ...oiiaChannels.map((ch) => ch.buffer),
     ];
 
-    // Send to worker
     worker.postMessage(
       {
         type: 'process',
@@ -203,9 +210,51 @@ document.addEventListener('DOMContentLoaded', () => {
   // Init UI modules
   initDropzone((file) => {
     selectedFile = file;
+    updateProcessButton();
   });
 
   initControls();
+
+  // Init YouTube module
+  initYouTube((file) => {
+    selectedFile = file;
+    // Show file info for YouTube-sourced audio too
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    if (file) {
+      fileName.textContent = file.name;
+      fileInfo.classList.remove('hidden');
+    } else {
+      fileInfo.classList.add('hidden');
+    }
+    updateProcessButton();
+  });
+
+  // Tab switching: file vs youtube
+  const tabs = document.querySelectorAll('.input-tab');
+  const panels = document.querySelectorAll('.input-panel');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      inputMode = target;
+
+      // Update tab active state
+      tabs.forEach((t) => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      // Update panel visibility
+      panels.forEach((p) => p.classList.remove('active'));
+      document.getElementById(`panel-${target}`).classList.add('active');
+    });
+  });
+
+  // Wire up the file remove button to also clear YouTube state
+  const fileRemove = document.getElementById('file-remove');
+  fileRemove.addEventListener('click', () => {
+    selectedFile = null;
+    updateProcessButton();
+  });
 
   // Wire up the process button
   const btnProcess = document.getElementById('btn-process');
