@@ -33,7 +33,7 @@ let worker = null;
 let audioCtx = null;
 
 // --- The oiia source audio URL (bundled in public/assets/) ---
-const OIIA_SOURCE_URL = './assets/oiia_source.wav';
+const OIIA_SOURCE_URL = './assets/oiia.mp3';
 
 /**
  * Get or create an AudioContext (lazy init on user gesture).
@@ -74,7 +74,7 @@ async function loadOiiaSource() {
   if (!response.ok) {
     throw new Error(
       `Could not load oiia source audio (${response.status}). ` +
-      `Make sure "oiia_source.wav" is in the public/assets/ folder.`
+      `Make sure "oiia.mp3" is in the public/assets/ folder.`
     );
   }
   const arrayBuffer = await response.arrayBuffer();
