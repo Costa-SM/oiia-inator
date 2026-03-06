@@ -4,16 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The oiia-inator</title>
-  <!-- Critical CSS: hide inactive screens immediately to prevent flash -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>" />
+  <!--
+    Critical inline CSS — ensures a styled first paint BEFORE the JS bundle
+    (and thus the Vite-injected stylesheet) has loaded. Everything here is
+    intentionally duplicated from main.css so the page never flashes unstyled.
+  -->
   <style>
-    .screen { display: none; }
-    .screen.active { display: flex; flex-direction: column; align-items: center; }
-    body { margin: 0; background: #1a1a2e; color: #f0f0f0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow-x: hidden; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #1a1a2e;
+      color: #f0f0f0;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    #app {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .screen { display: none; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+    .input-panel { display: none; width: 100%; }
+    .input-panel.active { display: block; }
+    .hidden { display: none !important; }
+    .title {
+      font-size: 2.5rem; font-weight: 800; text-align: center;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, #f7922f, #e84393, #9b59b6);
+      background-clip: text; -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      text-align: center; color: #b0b0cc;
+      font-size: 1.15rem; margin-bottom: 2rem; font-style: italic;
+    }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- Main screen -->
+    <!-- ==================== Main screen ==================== -->
     <div id="screen-main" class="screen active">
       <h1 class="title">The oiia-inator</h1>
       <p class="subtitle">Turn any audio into oiiaioiiiai</p>
@@ -49,11 +84,19 @@
         <div id="youtube-status" class="youtube-status hidden"></div>
       </div>
 
+      <!-- Selected file info -->
       <div id="file-info" class="file-info hidden">
         <span id="file-name"></span>
         <button id="file-remove" class="btn-icon" title="Remove">✕</button>
       </div>
 
+      <!-- Error banner (inline, replaces alert()) -->
+      <div id="error-banner" class="error-banner hidden" role="alert">
+        <span id="error-message"></span>
+        <button id="error-dismiss" class="btn-icon" title="Dismiss">✕</button>
+      </div>
+
+      <!-- Settings -->
       <div class="controls">
         <h2>Settings</h2>
 
@@ -85,9 +128,13 @@
       </div>
 
       <button id="btn-process" class="btn-primary" disabled>oiia-ify!</button>
+
+      <footer class="footer">
+        Made with 🐱 and mass oiia production
+      </footer>
     </div>
 
-    <!-- Loading screen -->
+    <!-- ==================== Loading screen ==================== -->
     <div id="screen-loading" class="screen">
       <div class="loading-content">
         <div class="loading-cat">🐱</div>
@@ -100,7 +147,7 @@
       </div>
     </div>
 
-    <!-- Result screen -->
+    <!-- ==================== Result screen ==================== -->
     <div id="screen-result" class="screen">
       <h1 class="title">Your oiia is ready!</h1>
 
