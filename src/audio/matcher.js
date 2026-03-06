@@ -58,12 +58,51 @@ function cosineDistance(a, b) {
  * @returns {{ index: number, distance: number }[]}
  */
 function kNearest(targetVec, corpusVecs, k) {
-  const distances = corpusVecs.map((cv, idx) => ({
-    index: idx,
-    distance: cosineDistance(targetVec, cv),
-  }));
-  distances.sort((a, b) => a.distance - b.distance);
-  return distances.slice(0, k);
+  if (k <= 0) return [];
+
+  const corpusLength = corpusVecs.length;
+  if (corpusLength === 0) return [];
+
+  // Fast path: k === 1 → single linear scan for the minimum (avoids O(N log N) sort).
+  if (k === 1) {
+    let bestIndex = 0;
+    let bestDistance = cosineDistance(targetVec, corpusVecs[0]);
+    for (let i = 1; i < corpusLength; i++) {
+      const d = cosineDistance(targetVec, corpusVecs[i]);
+      if (d < bestDistance) {
+        bestDistance = d;
+        bestIndex = i;
+      }
+    }
+    return [{ index: bestIndex, distance: bestDistance }];
+  }
+
+  // General case: small k > 1 — maintain a sorted array of the best k elements.
+  /** @type {{ index: number, distance: number }[]} */
+  const nearest = [];
+
+  for (let i = 0; i < corpusLength; i++) {
+    const d = cosineDistance(targetVec, corpusVecs[i]);
+
+    if (nearest.length < k || d < nearest[nearest.length - 1].distance) {
+      // Find insertion point to keep ascending order by distance.
+      let insertAt = nearest.length;
+      for (let j = 0; j < nearest.length; j++) {
+        if (d < nearest[j].distance) {
+          insertAt = j;
+          break;
+        }
+      }
+      nearest.splice(insertAt, 0, { index: i, distance: d });
+
+      // Trim to k best candidates.
+      if (nearest.length > k) {
+        nearest.pop();
+      }
+    }
+  }
+
+  return nearest;
 }
 
 /**

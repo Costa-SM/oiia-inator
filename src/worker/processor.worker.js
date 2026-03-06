@@ -98,31 +98,27 @@ async function process(payload) {
     reportProgress(75, 'Frames matched', 'Matches found!');
 
     // --- Step 7: Apply pitch shifting if enabled ---
-    let processedCorpus = corpus;
+    // Store per-frame shifted audio so each frame gets the correct pitch,
+    // even when multiple frames match the same corpus snippet with different targets.
+    let perFrameRaws = null;
 
     if (pitchShift && corpusPitches && targetPitches) {
       reportProgress(77, 'Pitch-shifting snippets...', 'Convincing the cat to change key...');
 
-      // Clone corpus so we don't mutate the originals
-      processedCorpus = corpus.map((s) => ({ ...s }));
+      perFrameRaws = new Array(matchedIndices.length);
 
       for (let i = 0; i < matchedIndices.length; i++) {
         const corpusIdx = matchedIndices[i];
         const snippetPitch = corpusPitches[corpusIdx];
         const framePitch = targetPitches[i];
 
-        if (snippetPitch != null && framePitch != null) {
-          const shifted = matchPitch(
-            corpus[corpusIdx].raw,
-            snippetPitch,
-            framePitch,
-            sampleRate
-          );
-          processedCorpus[corpusIdx] = {
-            ...corpus[corpusIdx],
-            raw: shifted,
-          };
-        }
+        // Pitch-shift this snippet for this specific frame's target pitch
+        perFrameRaws[i] = matchPitch(
+          corpus[corpusIdx].raw,
+          snippetPitch,
+          framePitch,
+          sampleRate
+        );
 
         if (i % 100 === 0) {
           const pct = 77 + (i / matchedIndices.length) * 8;
@@ -138,9 +134,11 @@ async function process(payload) {
     reportProgress(synthStart, 'Synthesizing audio...', 'Stitching oiias together...');
     const outputAudio = synthesize(
       matchedIndices,
-      processedCorpus,
+      corpus,
       targetFrames,
-      sampleRate
+      sampleRate,
+      0.5,
+      perFrameRaws
     );
     reportProgress(95, 'Synthesis complete', 'Final touches...');
 

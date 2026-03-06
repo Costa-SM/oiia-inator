@@ -29,9 +29,11 @@ function rms(samples) {
  * @param {Float32Array[]}  targetFrames   — the target audio frames
  * @param {number}          sampleRate     — sample rate (Hz)
  * @param {number}          [overlapRatio=0.5] — overlap ratio used during segmentation
+ * @param {Float32Array[]|null} [perFrameRaws=null] — optional per-frame pitch-shifted audio;
+ *   if provided, perFrameRaws[i] is used instead of corpus[matchedIndices[i]].raw for frame i.
  * @returns {Float32Array}  — the reconstructed audio
  */
-export function synthesize(matchedIndices, corpus, targetFrames, sampleRate, overlapRatio = 0.5) {
+export function synthesize(matchedIndices, corpus, targetFrames, sampleRate, overlapRatio = 0.5, perFrameRaws = null) {
   if (matchedIndices.length === 0 || corpus.length === 0) {
     return new Float32Array(0);
   }
@@ -46,18 +48,20 @@ export function synthesize(matchedIndices, corpus, targetFrames, sampleRate, ove
 
   for (let i = 0; i < matchedIndices.length; i++) {
     const corpusIdx = matchedIndices[i];
-    const snippet = corpus[corpusIdx];
     const targetFrame = targetFrames[i];
 
+    // Use per-frame pitch-shifted audio if available, otherwise original corpus snippet
+    const rawSamples = perFrameRaws ? perFrameRaws[i] : corpus[corpusIdx].raw;
+
     // Compute amplitude scaling: match target RMS
-    const snippetRms = rms(snippet.raw);
+    const snippetRms = rms(rawSamples);
     const targetRms = rms(targetFrame);
     const gain = snippetRms > 0.0001 ? targetRms / snippetRms : 0;
 
     const writeStart = i * hopSize;
 
     for (let j = 0; j < snippetLength && writeStart + j < outputLength; j++) {
-      const windowed = snippet.raw[j] * win[j] * gain;
+      const windowed = rawSamples[j] * win[j] * gain;
       output[writeStart + j] += windowed;
       normBuffer[writeStart + j] += win[j];
     }

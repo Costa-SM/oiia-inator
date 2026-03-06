@@ -61,10 +61,10 @@ export function extractFeatures(samples, sampleRate) {
   );
 
   return {
-    mfcc: result.mfcc || new Array(13).fill(0),
-    rms: result.rms || 0,
-    spectralCentroid: result.spectralCentroid || 0,
-    chroma: result.chroma || new Array(12).fill(0),
+    mfcc: result.mfcc ?? new Array(13).fill(0),
+    rms: result.rms ?? 0,
+    spectralCentroid: result.spectralCentroid ?? 0,
+    chroma: result.chroma ?? new Array(12).fill(0),
   };
 }
 

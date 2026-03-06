@@ -26,6 +26,10 @@ export function initDropzone(onFileSelected) {
   /** @type {number | null} */
   let errorTimeout = null;
 
+  // Counter to track nested dragenter/dragleave events from child elements,
+  // preventing the highlight from flickering when dragging over children.
+  let dragCounter = 0;
+
   // --- Click to browse ---
   dropzone.addEventListener('click', () => {
     fileInput.click();
@@ -41,24 +45,30 @@ export function initDropzone(onFileSelected) {
   dropzone.addEventListener('dragover', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dropzone.classList.add('dragover');
   });
 
   dropzone.addEventListener('dragenter', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dropzone.classList.add('dragover');
+    dragCounter++;
+    if (dragCounter === 1) {
+      dropzone.classList.add('dragover');
+    }
   });
 
   dropzone.addEventListener('dragleave', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dropzone.classList.remove('dragover');
+    dragCounter--;
+    if (dragCounter === 0) {
+      dropzone.classList.remove('dragover');
+    }
   });
 
   dropzone.addEventListener('drop', (e) => {
     e.preventDefault();
     e.stopPropagation();
+    dragCounter = 0;
     dropzone.classList.remove('dragover');
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {

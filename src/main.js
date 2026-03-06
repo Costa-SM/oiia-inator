@@ -143,6 +143,16 @@ async function startProcessing() {
       loadOiiaSource(),
     ]);
 
+    // Both sources are decoded through the same AudioContext, so they share
+    // its native sample rate. Assert this to guard against future refactors
+    // (e.g., using separate contexts) that could silently break processing.
+    if (targetResult.sampleRate !== oiiaResult.sampleRate) {
+      throw new Error(
+        `Sample rate mismatch: target is ${targetResult.sampleRate}Hz ` +
+        `but oiia source is ${oiiaResult.sampleRate}Hz. Both must match.`
+      );
+    }
+
     updateProgress(5, 'Audio decoded! Starting the pipeline...');
 
     // Create worker (or reuse)
